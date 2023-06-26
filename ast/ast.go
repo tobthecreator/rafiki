@@ -7,12 +7,12 @@ type Node interface {
 }
 
 type Statement interface {
-	Node
+	Node // Extend Node interface implicitly
 	statementNode()
 }
 
 type Expression interface {
-	Node
+	Node // Extend Node interface implicitly
 	expressionNode()
 }
 
@@ -33,6 +33,9 @@ type LetStatement struct {
 	Name  *Identifier
 	Value Expression
 }
+
+func (ls *LetStatement) statementNode()       {}
+func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
 
 type Identifier struct {
 	Token token.Token // token.IDENT
