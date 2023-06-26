@@ -11,20 +11,35 @@ const (
 	INT   = "INT"
 
 	// Operators
-	ASSIGN = "ASSIGN"
-	PLUS   = "PLUS"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
+	BANG     = "!"
+	ASTERISK = "*"
+	SLASH    = "/"
+
+	// Conditionals
+	LT     = "<"
+	GT     = ">"
+	EQ     = "=="
+	NOT_EQ = "!="
 
 	// Delimiters
-	COMMA     = "COMMA"
-	SEMICOLON = "SEMICOLON"
-	LPAREN    = "LPAREN"
-	RPAREN    = "RPAREN"
-	LBRACE    = "LBRACE"
-	RBRACE    = "RBRACE"
+	COMMA     = ","
+	SEMICOLON = ";"
+	LPAREN    = "("
+	RPAREN    = ")"
+	LBRACE    = "{"
+	RBRACE    = "}"
 
 	// Keywords
 	FUNCTION = "FUNCTION"
 	LET      = "LET"
+	TRUE     = "TRUE"
+	FALSE    = "FALSE"
+	IF       = "IF"
+	ELSE     = "ELSE"
+	RETURN   = "RETURN"
 )
 
 type Token struct {
@@ -37,8 +52,13 @@ func NewToken(tokenType TokenType, literal byte) Token {
 }
 
 var keywords = map[string]TokenType{
-	"fn":  FUNCTION,
-	"let": LET,
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
 }
 
 func LookupIdentifier(identifier string) TokenType {
