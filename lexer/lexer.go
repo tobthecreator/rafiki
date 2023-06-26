@@ -1,6 +1,8 @@
 package lexer
 
-import "rafiki/token"
+import (
+	"rafiki/token"
+)
 
 type Lexer struct {
 	input           string
