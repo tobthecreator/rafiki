@@ -10,7 +10,6 @@ import (
 )
 
 const WELCOME = "Rafiki Version 0.1\nPress Ctrl+C to Exit\n"
-
 const PROMPT = "rafiki >> "
 
 func Start(in io.Reader, out io.Writer) {

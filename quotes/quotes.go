@@ -13,7 +13,7 @@ var quoteList = []string{
 	"Ah. Change is good!",
 	"Any story worth telling is worth telling twice!",
 	"You're a baboon, and I'm not",
-	"The Roar is a very powerful gitf. It can be used for great good. but it can also lead to terrible evil.",
+	"The Roar is a very powerful gift. It can be used for great good. but it can also lead to terrible evil.",
 }
 
 func PrintQuote() {
