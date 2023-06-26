@@ -9,6 +9,8 @@ import (
 	"rafiki/token"
 )
 
+// TODO - find an equivalent package to readline and implement
+
 const WELCOME = "Rafiki Version 0.1\nPress Ctrl+C to Exit\n"
 const PROMPT = "rafiki >> "
 
