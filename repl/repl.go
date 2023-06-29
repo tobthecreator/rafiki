@@ -6,6 +6,7 @@ import (
 	"io"
 	"rafiki/eval"
 	"rafiki/lexer"
+	"rafiki/object"
 	"rafiki/parser"
 	"rafiki/quotes"
 )
@@ -63,6 +64,9 @@ $$$$$$$$$$$$   > <~ ~d$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$`
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	// We want our environment to persist between REPL calls
+	e := object.NewEnvironment()
+
 	fmt.Printf("\n")
 	io.WriteString(out, RAFIKI)
 	fmt.Printf("\n\n")
@@ -89,7 +93,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := eval.Eval(program)
+		result := eval.Eval(program, e)
 
 		io.WriteString(out, result.Inspect())
 		io.WriteString(out, "\n")
