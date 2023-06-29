@@ -70,6 +70,14 @@ func Eval(node ast.Node) object.Object {
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
 
+	case *ast.LetStatement:
+		val := Eval(node.Value)
+		if isError(val) {
+			return val
+		}
+
+		// implementation
+
 	default:
 		fmt.Printf("node: %v\n", node)
 	}
