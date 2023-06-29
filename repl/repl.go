@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"rafiki/eval"
 	"rafiki/lexer"
 	"rafiki/parser"
 	"rafiki/quotes"
@@ -88,7 +89,9 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		io.WriteString(out, program.String())
+		result := eval.Eval(program)
+
+		io.WriteString(out, result.Inspect())
 		io.WriteString(out, "\n")
 	}
 }
