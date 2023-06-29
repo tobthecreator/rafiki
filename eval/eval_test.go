@@ -161,15 +161,16 @@ func TestErrorHandling(t *testing.T) {
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 		{
+			// This test only passes in this string format lol
 			`
-if (10 > 1) {
-  if (10 > 1) {
-    return true + false;
-  }
+				if (10 > 1) {
+					if (10 > 1) {
+						return true + false;
+					}
 
-  return 1;
-}
-`,
+					return 1;
+				}
+			`,
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
 	}
