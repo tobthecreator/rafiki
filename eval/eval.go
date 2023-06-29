@@ -16,9 +16,12 @@ var (
 func Eval(node ast.Node) object.Object {
 	switch node := node.(type) {
 
-	// Base case, top node
+	// Base case, top node of the program or a top node of a block
 	case *ast.Program:
-		return evalStatements(node.Statements)
+		return evalProgram(node.Statements)
+
+	case *ast.BlockStatement:
+		return evalBlockStatement(node)
 
 	// Second layer base case, individual statements
 	case *ast.ExpressionStatement:
@@ -34,6 +37,13 @@ func Eval(node ast.Node) object.Object {
 
 		return evalInfixExpression(node.Operator, left, right)
 
+	case *ast.IfExpression:
+		return evalIfExpression(node)
+
+	case *ast.ReturnStatement:
+		val := Eval(node.ReturnValue)
+		return &object.ReturnValue{Value: val}
+
 	// Leaves, the objects
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
@@ -48,11 +58,49 @@ func Eval(node ast.Node) object.Object {
 	return NULL
 }
 
-func evalStatements(statements []ast.Statement) object.Object {
+func evalProgram(statements []ast.Statement) object.Object {
 	var result object.Object
 
 	for _, statement := range statements {
 		result = Eval(statement)
+
+		if returnValue, ok := result.(*object.ReturnValue); ok {
+			return returnValue.Value
+		}
+	}
+
+	return result
+}
+
+/*
+Functionally similar to evalProgram(), but requires a separate implementation
+to support return statements that may be nested deeply in the block statement
+
+# In the case
+
+x = 10
+
+	if (x > 5) {
+		if (x > 9) {
+			return 999
+		}
+
+		return 1
+	}
+
+evalProgram returns 1.
+
+evalBlockStatement() returns as soon as it encounters a return statement
+*/
+func evalBlockStatement(block *ast.BlockStatement) object.Object {
+	var result object.Object
+
+	for _, statement := range block.Statements {
+		result = Eval(statement)
+
+		if result != nil && result.Type() == object.RETURN_VALUE_OBJ {
+			return result
+		}
 	}
 
 	return result
@@ -141,4 +189,32 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	}
 
 	return FALSE
+}
+
+func evalIfExpression(expr *ast.IfExpression) object.Object {
+	condition := Eval(expr.Condition)
+
+	if isTruthy(condition) {
+		return Eval(expr.Consequence)
+	}
+
+	// If else {}, else
+	if expr.Alternative != nil {
+		return Eval(expr.Alternative)
+	}
+
+	return NULL
+}
+
+func isTruthy(o object.Object) bool {
+	switch o {
+	case NULL:
+		return false
+	case TRUE:
+		return true
+	case FALSE:
+		return false
+	default:
+		return true
+	}
 }
