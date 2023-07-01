@@ -79,6 +79,9 @@ func (l *Lexer) NextToken() token.Token {
 	case ']':
 		t = token.NewToken(token.RBRACKET, l.char)
 
+	case ':':
+		t = token.NewToken(token.COLON, l.char)
+
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.char
