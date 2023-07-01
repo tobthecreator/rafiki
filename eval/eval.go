@@ -102,6 +102,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
+
 	default:
 		fmt.Printf("node: %v\n", node)
 	}
@@ -182,13 +185,20 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 	switch {
 	case leftType == rightType && leftType == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+
+	case leftType == rightType && leftType == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
+
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
+
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
+
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s",
 			left.Type(), operator, right.Type())
+
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 
@@ -222,6 +232,25 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 			left.Type(), operator, right.Type())
 
 	}
+}
+
+func evalStringInfixExpression(
+	operator string,
+	left, right object.Object,
+) object.Object {
+
+	// Only one supported operand
+	if operator != "+" {
+		return newError("unknown operator: %s %s %s",
+			left.Type(), operator, right.Type())
+	}
+
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+
+	concat := leftVal + rightVal
+
+	return &object.String{Value: concat}
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {

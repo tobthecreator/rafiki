@@ -36,6 +36,10 @@ func (l *Lexer) NextToken() token.Token {
 			t = token.NewToken(token.ASSIGN, l.char)
 		}
 
+	case '"':
+		t.Type = token.STRING
+		t.Literal = l.readString()
+
 	case ';':
 		t = token.NewToken(token.SEMICOLON, l.char)
 
@@ -163,4 +167,17 @@ func isDigit(char byte) bool {
 func isLetter(char byte) bool {
 	// In Go ASCII characters are represented numerically
 	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'
+}
+
+func (l *Lexer) readString() string {
+	stringStart := l.currentPosition + 1
+
+	for {
+		l.readChar()
+		if l.char == '"' || l.char == 0 {
+			break
+		}
+	}
+
+	return l.input[stringStart:l.currentPosition]
 }
