@@ -66,6 +66,7 @@ func Start(in io.Reader, out io.Writer) {
 
 	// We want our environment to persist between REPL calls
 	e := object.NewEnvironment()
+	macroEnv := object.NewEnvironment()
 
 	fmt.Printf("\n")
 	io.WriteString(out, RAFIKI)
@@ -93,7 +94,10 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		result := eval.Eval(program, e)
+		eval.DefineMacros(program, macroEnv)
+		expandedProgram := eval.ExpandMacros(program, macroEnv)
+
+		result := eval.Eval(expandedProgram, e)
 
 		io.WriteString(out, result.Inspect())
 		io.WriteString(out, "\n")
