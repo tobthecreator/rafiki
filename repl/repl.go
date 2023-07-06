@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"rafiki/compiler"
 	"rafiki/eval"
 	"rafiki/lexer"
 	"rafiki/object"
 	"rafiki/parser"
 	"rafiki/quotes"
+	"rafiki/vm"
 )
 
 // TODO - find an equivalent package to readline and implement
@@ -88,7 +90,6 @@ func Start(in io.Reader, out io.Writer) {
 		p := parser.NewParser(l)
 
 		program := p.ParseProgram()
-
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
@@ -97,8 +98,28 @@ func Start(in io.Reader, out io.Writer) {
 		eval.DefineMacros(program, macroEnv)
 		expandedProgram := eval.ExpandMacros(program, macroEnv)
 
-		result := eval.Eval(expandedProgram, e)
+		compiler := compiler.NewCompiler()
+		err := compiler.Compile(expandedProgram)
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
+			continue
+		}
 
+		machine := vm.NewVm(compiler.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		stackTop := machine.StackTop()
+		io.WriteString(out, "Compiler Output:\n")
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
+
+		// Interpreted Output
+		result := eval.Eval(expandedProgram, e)
+		io.WriteString(out, "Interpreted Output:\n")
 		io.WriteString(out, result.Inspect())
 		io.WriteString(out, "\n")
 	}
