@@ -145,9 +145,9 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		stackTop := machine.StackTop()
+		lastPopped := machine.LastPoppedStackElem()
 		io.WriteString(out, "Compiler Output:\n")
-		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, lastPopped.Inspect())
 		io.WriteString(out, "\n")
 
 		// Interpreted Output
