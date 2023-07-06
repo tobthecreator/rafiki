@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"rafiki/compiler"
 	"rafiki/eval"
 	"rafiki/lexer"
 	"rafiki/object"
 	"rafiki/parser"
 	"rafiki/quotes"
+	"rafiki/vm"
 )
 
 // TODO - find an equivalent package to readline and implement
@@ -61,6 +63,39 @@ $$$$$$$$$$$$$$$@b  '$$$$$$$$$N/=+.  ~:.%: #$$$ 9$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$**""  ..#$$$$$$$$$$bed$$o(.Lx@$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$   > <~ ~d$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$`
 
+/*
+	The execution order of the program with the Interpreter looks like this:
+
+	Lexer: 		Take the input code and look it as a pure string.
+				Look through that string for recognizable tokens - keywords, variables names, numbers, arrays, etc.
+				This output will be an array of tokens that are in a format which we can reliably parse.
+
+	Parser: 	Take the tokens from the Lexer.  Use those tokens to build an abstract syntax tree that relates the tokens to eachother.
+				Instead of the Lexer's array of "1 + 2", we'll now have "+" as a parent node with "1" and "2" as child nodes.
+				In the parser, we find our program's structure and draw up a map for evaluation.
+
+	Evaluator:	Take the AST from the Parser. Walk through the tree from top to bottom. Turn nodes into real values and execute them.
+
+	The Interpreter is a point-translator of code into execution.  It executes the code you give it right here, right now.
+
+	The Compiler, on the hand, has a more complex set of operations.
+
+	The execution order for the Compiler looks like this:
+
+	Lexer:		Same behavior.
+
+	Parser: 	Same behavior.
+
+	Compiler:	Take in the AST from the Parser.  Turn it into different slices of data. One slice is the variables and constants declared
+				in the program, located in arrays.  The other slice is the functions we'll perform on that data, with the "addresses"
+				of where that data is located in the constant and variables arrays.  The functions are called OpCodes, the addresses, Operands.
+
+				The Compiler, on the surface, will have a very similar structure to the Evaluator.  But instead of truly evaluating,
+				we're translating our high level language into something much simpler to evaluate.
+
+	VM:			The VM then takes these OpCodes and Operands and evaluate them in a very similar manner to the Evaluator.
+*/
+
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
@@ -88,7 +123,6 @@ func Start(in io.Reader, out io.Writer) {
 		p := parser.NewParser(l)
 
 		program := p.ParseProgram()
-
 		if len(p.Errors()) != 0 {
 			printParserErrors(out, p.Errors())
 			continue
@@ -97,8 +131,28 @@ func Start(in io.Reader, out io.Writer) {
 		eval.DefineMacros(program, macroEnv)
 		expandedProgram := eval.ExpandMacros(program, macroEnv)
 
-		result := eval.Eval(expandedProgram, e)
+		compiler := compiler.NewCompiler()
+		err := compiler.Compile(expandedProgram)
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
+			continue
+		}
 
+		machine := vm.NewVm(compiler.Bytecode())
+		err = machine.Run()
+		if err != nil {
+			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
+			continue
+		}
+
+		stackTop := machine.StackTop()
+		io.WriteString(out, "Compiler Output:\n")
+		io.WriteString(out, stackTop.Inspect())
+		io.WriteString(out, "\n")
+
+		// Interpreted Output
+		result := eval.Eval(expandedProgram, e)
+		io.WriteString(out, "Interpreted Output:\n")
 		io.WriteString(out, result.Inspect())
 		io.WriteString(out, "\n")
 	}
