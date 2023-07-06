@@ -27,22 +27,18 @@ func NewVm(bytecode *compiler.Bytecode) *VM {
 	}
 }
 
-func (vm *VM) StackTop() object.Object {
-	if vm.sp == 0 {
-		return nil
-	}
-
-	return vm.stack[vm.sp-1]
-}
-
 func (vm *VM) Run() error {
 	for ip := 0; ip < len(vm.instructions); ip++ {
 		op := code.Opcode(vm.instructions[ip])
 
 		switch op {
 		case code.OpConstant:
-			constIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			// I still don't quite understand how this is working
+			// before the code was just code.ReadUint16(vm.instructions[ip+1:])
+			// If we already know the size, then why not get subslice of exactly that size?
+			opConstantSize := 2
+			constIndex := code.ReadUint16(vm.instructions[ip+1 : ip+1+opConstantSize])
+			ip += opConstantSize
 
 			err := vm.push(vm.constants[constIndex])
 
@@ -64,6 +60,14 @@ func (vm *VM) Run() error {
 	}
 
 	return nil
+}
+
+func (vm *VM) StackTop() object.Object {
+	if vm.sp == 0 {
+		return nil
+	}
+
+	return vm.stack[vm.sp-1]
 }
 
 func (vm *VM) push(o object.Object) error {

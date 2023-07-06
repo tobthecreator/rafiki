@@ -63,6 +63,34 @@ $$$$$$$$$$$$$$$@b  '$$$$$$$$$N/=+.  ~:.%: #$$$ 9$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$$**""  ..#$$$$$$$$$$bed$$o(.Lx@$$$$$$$$$$$$$$$$$$$$$
 $$$$$$$$$$$$   > <~ ~d$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$`
 
+/*
+	The execution order of the program with the Interpreter looks like this:
+
+	Lexer: 		Take the input code and look it as a pure string.
+				Look through that string for recognizable tokens - keywords, variables names, numbers, arrays, etc.
+				This output will be an array of tokens that are in a format which we can reliably parse.
+
+	Parser: 	Take the tokens from the Lexer.  Use those tokens to build an abstract syntax tree that relates the tokens to eachother.
+				Instead of the Lexer's array of "1 + 2", we'll now have "+" as a parent node with "1" and "2" as child nodes.
+				In the parser, we find our program's structure and draw up a map for evaluation.
+
+	Evaluator:	Take the AST from the Parser. Walk through the tree from top to bottom. Turn nodes into real values and execute them.
+
+	The Interpreter is a point-translator of code into execution.  It executes the code you give it right here, right now.
+
+	The Compiler, on the hand, has a more complex set of operations.
+
+	The execution order for the Compiler looks like this:
+
+	Lexer:		Same behavior.
+
+	Parser: 	Same behavior.
+
+	Compiler:	jfjfj
+
+	VM:			jfjf
+*/
+
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
