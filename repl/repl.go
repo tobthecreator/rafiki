@@ -86,9 +86,14 @@ $$$$$$$$$$$$   > <~ ~d$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$`
 
 	Parser: 	Same behavior.
 
-	Compiler:	jfjfj
+	Compiler:	Take in the AST from the Parser.  Turn it into different slices of data. One slice is the variables and constants declared
+				in the program, located in arrays.  The other slice is the functions we'll perform on that data, with the "addresses"
+				of where that data is located in the constant and variables arrays.  The functions are called OpCodes, the addresses, Operands.
 
-	VM:			jfjf
+				The Compiler, on the surface, will have a very similar structure to the Evaluator.  But instead of truly evaluating,
+				we're translating our high level language into something much simpler to evaluate.
+
+	VM:			The VM then takes these OpCodes and Operands and evaluate them in a very similar manner to the Evaluator.
 */
 
 func Start(in io.Reader, out io.Writer) {
