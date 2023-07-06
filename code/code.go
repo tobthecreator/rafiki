@@ -17,6 +17,8 @@ const (
 	OpSub
 	OpMul
 	OpDiv
+	OpTrue
+	OpFalse
 )
 
 type Definition struct {
@@ -31,6 +33,8 @@ var definitions = map[Opcode]*Definition{
 	OpMul:      {"OpMul", []int{}}, // Pop the two topmost elements and multiply them
 	OpDiv:      {"OpDiv", []int{}}, // Pop the two topmost elements and divide them
 	OpPop:      {"OpPop", []int{}}, // Pop the topmost element off the stack
+	OpTrue:     {"OpTrue", []int{}},
+	OpFalse:    {"OpFalse", []int{}},
 }
 
 func Lookup(op byte) (*Definition, error) {
