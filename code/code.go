@@ -24,6 +24,8 @@ const (
 	OpGreaterThan
 	OpMinus
 	OpBang
+	OpJumpNotTruthy
+	OpJump
 )
 
 type Definition struct {
@@ -32,19 +34,21 @@ type Definition struct {
 }
 
 var definitions = map[Opcode]*Definition{
-	OpConstant:    {"OpConstant", []int{2}},
-	OpAdd:         {"OpAdd", []int{}}, // Pop the two topmost elements and add them
-	OpSub:         {"OpSub", []int{}}, // Pop the two topmost elements and subtract them
-	OpMul:         {"OpMul", []int{}}, // Pop the two topmost elements and multiply them
-	OpDiv:         {"OpDiv", []int{}}, // Pop the two topmost elements and divide them
-	OpPop:         {"OpPop", []int{}}, // Pop the topmost element off the stack
-	OpTrue:        {"OpTrue", []int{}},
-	OpFalse:       {"OpFalse", []int{}},
-	OpEqual:       {"OpEqual", []int{}},
-	OpNotEqual:    {"OpNotEqual", []int{}},
-	OpGreaterThan: {"OpGreaterThan", []int{}}, // To keep the instruction set small, we're going to reorder LessThans into GreaterThans
-	OpMinus:       {"OpMinus", []int{}},
-	OpBang:        {"OpBang", []int{}},
+	OpConstant:      {"OpConstant", []int{2}},
+	OpAdd:           {"OpAdd", []int{}}, // Pop the two topmost elements and add them
+	OpSub:           {"OpSub", []int{}}, // Pop the two topmost elements and subtract them
+	OpMul:           {"OpMul", []int{}}, // Pop the two topmost elements and multiply them
+	OpDiv:           {"OpDiv", []int{}}, // Pop the two topmost elements and divide them
+	OpPop:           {"OpPop", []int{}}, // Pop the topmost element off the stack
+	OpTrue:          {"OpTrue", []int{}},
+	OpFalse:         {"OpFalse", []int{}},
+	OpEqual:         {"OpEqual", []int{}},
+	OpNotEqual:      {"OpNotEqual", []int{}},
+	OpGreaterThan:   {"OpGreaterThan", []int{}}, // To keep the instruction set small, we're going to reorder LessThans into GreaterThans
+	OpMinus:         {"OpMinus", []int{}},
+	OpBang:          {"OpBang", []int{}},
+	OpJumpNotTruthy: {"OpJumpNotTruthy", []int{2}},
+	OpJump:          {"OpJump", []int{2}},
 }
 
 func Lookup(op byte) (*Definition, error) {
