@@ -7,6 +7,7 @@ import (
 	"rafiki/object"
 )
 
+const GlobalsSize = 65536
 const StackSize = 2048
 
 var True = &object.Boolean{Value: true}
@@ -16,6 +17,7 @@ var Null = &object.Null{}
 type VM struct {
 	constants    []object.Object
 	instructions code.Instructions
+	globals      []object.Object
 
 	stack []object.Object
 	sp    int // Points to next value. Top of stack is stack[sp-1]
@@ -23,12 +25,21 @@ type VM struct {
 
 func NewVm(bytecode *compiler.Bytecode) *VM {
 	return &VM{
-		instructions: bytecode.Instructions,
 		constants:    bytecode.Constants,
+		instructions: bytecode.Instructions,
+		globals:      make([]object.Object, GlobalsSize),
 
 		stack: make([]object.Object, StackSize),
 		sp:    0,
 	}
+}
+
+func NewVmWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
+	vm := NewVm(bytecode)
+
+	vm.globals = s
+
+	return vm
 }
 
 func (vm *VM) Run() error {
@@ -101,6 +112,21 @@ func (vm *VM) Run() error {
 
 		case code.OpNull:
 			err := vm.push(Null)
+			if err != nil {
+				return err
+			}
+
+		case code.OpSetGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1 : ip+3])
+			ip += 2
+
+			vm.globals[globalIndex] = vm.pop()
+
+		case code.OpGetGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1 : ip+3])
+			ip += 2
+
+			err := vm.push(vm.globals[globalIndex])
 			if err != nil {
 				return err
 			}

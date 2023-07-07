@@ -103,6 +103,10 @@ func Start(in io.Reader, out io.Writer) {
 	e := object.NewEnvironment()
 	macroEnv := object.NewEnvironment()
 
+	constants := []object.Object{}
+	globals := make([]object.Object, vm.GlobalsSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	fmt.Printf("\n")
 	io.WriteString(out, RAFIKI)
 	fmt.Printf("\n\n")
@@ -131,14 +135,17 @@ func Start(in io.Reader, out io.Writer) {
 		eval.DefineMacros(program, macroEnv)
 		expandedProgram := eval.ExpandMacros(program, macroEnv)
 
-		compiler := compiler.NewCompiler()
+		compiler := compiler.NewCompilerWithState(symbolTable, constants)
 		err := compiler.Compile(expandedProgram)
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Compilation failed:\n %s\n", err)
 			continue
 		}
 
-		machine := vm.NewVm(compiler.Bytecode())
+		code := compiler.Bytecode()
+		constants = code.Constants
+
+		machine := vm.NewVmWithGlobalsStore(code, globals)
 		err = machine.Run()
 		if err != nil {
 			fmt.Fprintf(out, "Woops! Executing bytecode failed:\n %s\n", err)
